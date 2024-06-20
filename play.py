@@ -1,7 +1,7 @@
 from ttsClient import TTSClient
 from llama3Client import Llama3Client
 
-ttsClient = TTSClient('http://localhost:8080/',seed=20)
+ttsClient = TTSClient('http://127.0.0.1:9966/tts',seed=20)
 ttsClient.init()
 llaClient = Llama3Client('http://localhost:11434/api/chat')
 llaClient.init()

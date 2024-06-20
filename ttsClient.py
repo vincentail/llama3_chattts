@@ -1,4 +1,4 @@
-from gradio_client import Client
+import requests
 import pygame
 
 class TTSClient:
@@ -8,9 +8,6 @@ class TTSClient:
         self.temperature = temperature
     
     def init(self):
-        self.client = Client(self.ttsServerUrl)
-        if self.seed == -1:
-            self.__generateSeed()
         # 初始化pygame
         pygame.init()
 
@@ -19,13 +16,17 @@ class TTSClient:
 
     def generateVoice(self,text):
         print('generating voice........')
-        result = self.client.predict(
-            text=text,
-            temperature=self.temperature,
-            audio_seed_input=self.seed,
-            api_name="/generate_audio"
-        )
-        voicePath = result[0]
+        res = requests.post(self.ttsServerUrl, data={
+            "text": text,
+            "prompt": "",
+            "voice": self.seed,
+            "temperature": self.temperature,
+            "top_p": 0.7,
+            "top_k": 20,
+            "skip_refine": 0,
+            "custom_voice": 0
+        })
+        voicePath=res.json().get('audio_files')[0]('filename')
         self.__speak(voicePath)
     
     def __speak(self,voicePath):
@@ -35,10 +36,6 @@ class TTSClient:
         # 等待音频播放完毕
         while pygame.mixer.get_busy():
             pygame.time.Clock().tick(10)
-
-    def __generateSeed(self):
-        result = self.client.predict(api_name="/generate_seed")
-        self.seed = result['value']
 
     def close(self):
         # 关闭pygame
